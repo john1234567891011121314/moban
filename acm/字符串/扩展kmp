@@ -1,0 +1,79 @@
+# 前缀函数
+
+ $\pi[i]$最长$s$的真前缀和真后缀$(最后一位是s[i])$匹配的长度
+$$
+\pi[0]=0;
+\pi[i]=\max_{k = 0\cdots i}\{ s[0\cdots k - 1]=s[i - (k - 1) \cdots i]  \}
+$$
+
+
+```c++
+vector<int> prefix_function(string s) {
+  int n = (int)s.length();
+  vector<int> pi(n, 0);
+  for (int i = 1; i < n; i++) {
+    int j = pi[i - 1];
+    while (j > 0 && s[i] != s[j]) j = pi[j - 1];
+    if (s[i] == s[j]) j++;
+    pi[i] = j;
+  }
+  return pi;
+}
+```
+
+## 查找$s$在$t$中的所有出现
+
+```c++
+vector<int> find_occurrences(string text, string pattern) {
+  string cur = pattern + '#' + text;
+  int sz1 = text.size(), sz2 = pattern.size();
+  vector<int> v;
+  vector<int> lps = prefix_function(cur);
+  for (int i = sz2 + 1; i <= sz1 + sz2; i++) {
+    if (lps[i] == sz2)
+      v.push_back(i - 2 * sz2);
+  }
+  return v;
+}
+```
+
+## 自动机
+
+```c++
+void compute_automaton(string s, vector<vector<int>>& aut) {
+  s += '#';
+  int n = s.size();
+  vector<int> pi = prefix_function(s);
+  aut.assign(n, vector<int>(26));
+  for (int i = 0; i < n; i++) {
+    for (int c = 0; c < 26; c++) {
+      if (i > 0 && 'a' + c != s[i])
+        aut[i][c] = aut[pi[i - 1]][c];
+      else
+        aut[i][c] = i + ('a' + c == s[i]);
+    }
+  }
+}
+```
+
+## z函数
+
+$z[i]$表示$s$和$s[i,n-1]$的最长公共前缀
+
+```c++
+vector<int> z_function(string s) {
+  int n = (int)s.length();
+  vector<int> z(n,0);
+  for (int i = 1, l = 0, r = 0; i < n; ++i) {
+    if (i <= r && z[i - l] < r - i + 1) {
+      z[i] = z[i - l];
+    } else {
+      z[i] = max(0, r - i + 1);
+      while (i + z[i] < n && s[z[i]] == s[i + z[i]]) ++z[i];
+    }
+    if (i + z[i] - 1 > r) l = i, r = i + z[i] - 1;
+  }
+  return z;
+}
+```
+

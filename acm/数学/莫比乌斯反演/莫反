@@ -1,0 +1,460 @@
+# 前置
+
+## 说明
+
+$$
+(f+g)(x)=f(x)+g(x)\\
+(f \cdot g)(x)=f(x)*g(x)
+$$
+
+
+
+## 整除分块
+
+对于$\lfloor \frac{n}{i} \rfloor$，我们发现其值最多只有$\sqrt n$  个
+
+同时有引理
+$$
+\lfloor\frac{a} {b*c}\rfloor =\lfloor\frac{ \lfloor \frac{a}{b} \rfloor} {c}\rfloor
+$$
+于是我们有
+
+```c++
+for(int l = 1, r; l <= n; l = r + 1)
+{
+    r = min(n. n / (n / l));
+    //code
+}
+```
+
+## 积性函数
+
+### 定义
+
+$$
+\gcd(a,b)==1,f(a*b)=f(a)*f(b)
+$$
+
+称满足上式的函数为**积性函数**
+
+其中，不满足互质条件但是式子仍然成立的称为**完全积性函数**
+
+### 性质
+
+若$f$是积性函数，同时$n=\prod_{i=1}^{m} p_{i}^{c_i}$，那么$f(n)=\prod_{i=1}^{m}f(p_i^{c_i})$
+
+若$f,g$均为积性函数，那么以下函数必然也是积性函数
+$$
+h(x)=f(x^p)\\
+ h(x)=f^p(x)\\
+ h(x)=f(x)* g(x)\\
+ h(x)=\sum_{d|x} f(d)* g(\frac{x}{d})
+$$
+
+### 常见的积性函数
+
+单位函数（完全积性）$:\epsilon		(n) = [n == 1]$
+
+恒等函数$: id_k(n) = n^k$
+
+$id(n) = n$
+
+常数函数（完全积性）$: 1(n) = 1$
+
+$d(n) = \sum_{d \mid n} 1$
+
+除数函数$: \sigma_k(n)=\sum_{d|k}d^k $
+
+$\sigma (n) = \sum_{d \mid n} d$
+
+欧拉函数$: \varphi_k(n)=\sum_{i=1}^n [gcd(i,n)==1] $
+
+莫比乌斯函数$:\mu(x)= \begin{cases} 1,n=1\\ 0,\exists d, d^2|n \\ (-1)^k,k为x的质因子个数  \end{cases} $
+
+### 公式
+
+$$
+f = g * 1\\
+f * \mu = g * 1 * \mu \\
+f * \mu = g * (1 * \mu) \\
+g = f
+$$
+
+
+
+## 迪利克雷卷积
+
+$$
+h(x)=\sum_{d|n}f(d)g(\frac{d}{x})=\sum_{a*b=x}f(a)*g(b)
+$$
+
+可以简写为
+$$
+h=f* g\\
+$$
+
+### 性质
+
+$$
+f* g=g * f \\
+(f * g) * h = f * (g * h)\\
+(f+g)* h = f* h +g * h
+$$
+
+
+
+$f$为任意函数，$f\times \epsilon=f $
+
+$f,g$为任意积性函数，则$h=f\times g$也是积性函数
+
+积性函数的逆元也是积性函数
+$$
+\sum_{d|n} \mu(d) = \begin{cases}
+&1,n==1\\
+&0,n!=1
+
+\end{cases}
+$$
+
+$$
+[gcd(i,j)==1] = \sum_{d|gcd(i,j)} \mu(d)
+$$
+
+$$
+\varphi * 1 = id
+$$
+
+$$
+1* \mu = \epsilon
+$$
+
+$$
+\mu * id =\varphi
+$$
+
+$$
+1 \times 1 = d
+$$
+
+$$
+1 \times id = \sigma
+$$
+
+
+
+$f$，$g$为任意函数
+
+如果$f(n)=\sum_{d|n} g(d)$ ，那么$g(n)=\sum_{d|n} \mu(d)*f(\frac{n}{d})$
+
+如果$f(n)=\sum_{n|d} g(d)$ ，那么$g(n)=\sum_{n|d} \mu(d)*f(\frac{d}{n})$
+
+$\sum_{d=1}^{n}\sum_{k=1}^{\lfloor \frac{n}{d} \rfloor} f(d)g(k)h(d*k)=\sum_{T=1}^{n}\sum_{k|T} f(d)g(k)h(T)$
+
+## 杜教筛
+
+杜教筛被用于处理一类数论函数的前缀和问题。对于数论函数$f$，杜教筛可以在低于线性时间的复杂度内计算其前缀和，而不要求$f$是数论函数。
+
+
+
+### 公式推导
+
+对于任意数论函数$f$，我们想求它的前缀和$F$，为此我们需要一个函数$g$
+$$
+\sum_{i=1}^{n} f * g &= \sum_{i=1}^{n} \sum_{d \mid i}f(d)*g(\frac{i}{d}) \\
+&= \sum_{i=1}^{n} g(i) \sum_{j=1}^{\lfloor \frac{n}{i} \rfloor}f(i) \\
+&= \sum_{i=1}^{n} g(i) F(\lfloor \frac{n}{i} \rfloor)
+$$
+将我们想要的$F(n)$提出来，那么就有
+$$
+F(n)*g(1)=\sum_{i=1}^{n}(f*g)(i) - \sum_{i=2}^{n}g(i) F(\lfloor \frac{n}{i} \rfloor)
+$$
+那么容易发现，后面那个式子是典型的整除分块，现在我们只需要考虑
+
+1. 快速计算$\sum_{i=1}^{n}(f*g)(i)$
+
+2. 快速计算$\sum_{i=1}^{n}g(i)$
+
+一般预处理$n^{\frac{2}{3}}$即可，直接做的复杂度为$O(n^{\frac{3}{4}})$
+
+时间复杂度是$O(n^{\frac{2}{3}})$，确切说是$O(k)+O(\frac{n}{\sqrt{k}})$
+
+$\sum_{i=1}^{n} \sum_{j=1}^n [gcd(i,j) == 1] = \sum_{i=1}^{n} \sum_{j=1}^n \sum_{d \mid gcd(i,j)}\mu(d) = \sum_{i=1}^{n}\mu(i)*(\lfloor  \frac{n}{i} \rfloor)^2 $
+
+
+
+## 题目
+
+求莫比乌斯函数和欧拉函数的前缀和
+
+### 分析
+
+根据$\mu * 1 = \epsilon$，我们就可以将$1$当成我们的$g$函数。
+
+针对欧拉函数，我们可以考虑莫比乌斯反演也可以考虑杜教筛
+
+反演
+$$
+\sum_{i=1}^{n} \varphi(i) = \sum_{i=1}^{n} \sum_{j=1}^{i-1} [gcd(i,j) == 1]
+$$
+此时我们发现只要稍作修改就变成了我们熟悉的形式
+
+筛
+
+$\varphi * 1 = id$，同理可得
+
+### code
+
+```c++
+int mu[N], phi[N];
+bool vis[N];
+ll pre_mu[N], pre_phi[N];
+map<ll,ll>pmu, pphi;
+void init()
+{
+	for(int i = 1; i < N; ++i) mu[i] = 1, phi[i] = i, vis[i] = 0;
+	for(int i = 2; i < N; ++i)
+	{
+		if(vis[i]) continue;
+		mu[i] = -1;
+		for(int j = 2 * i; j < N; j += i)
+		{
+			vis[j] = 1;
+			if((j / i) % i == 0) mu[j] = 0;
+			else mu[j] *= -1;
+		}
+		for(int j = i; j < N; j += i)
+		{
+			phi[j] = phi[j] / i * (i - 1);
+		}
+	}
+	for(int i = 1; i < N; ++i)
+	{
+		pre_mu[i] = pre_mu[i - 1] + mu[i];
+		pre_phi[i] = pre_phi[i - 1] + phi[i];
+	}
+}
+ll query_mu(ll x)
+{
+	if(x < N) return pre_mu[x];
+	if(pmu.find(x) != pmu.end()) return pmu[x];
+	ll res = 1ll;
+	for(ll l = 2, r; l <= x; l = r + 1)
+	{
+		r = min(x, x / (x / l));
+		res -= query_mu(x / l) * (r - l + 1);
+	}
+	pmu[x] = res;
+	return res;
+}
+ll query_phi(ll x)
+{
+	if(x < N) return pre_phi[x];
+	if(pphi.find(x) != pphi.end()) return pphi[x];
+	ll res = 0;
+	for(ll l = 1, r; l <= x; l = r + 1)
+	{
+		r = min(x, x / (x / l));
+		res += (query_mu(r) - query_mu(l - 1)) * (x / l) * (x / l);
+	}
+	return pphi[x] = (res - 1) / 2 + 1;
+}
+```
+
+## 题目
+
+求$\sum_{i=1}^n \sum_{j=1}^n i*j*\gcd(i,j)$
+
+### 分析
+
+$$
+\sum_{i=1}^n \sum_{j=1}^n i*j*\gcd(i,j)  &= \sum_{d=1}^n \sum_{i=1}^n \sum_{j=1}^n i*j*d* [\gcd(i,j)==d] \\
+&= \sum_{d=1}^n d^3\sum_{i=1}^{\lfloor\frac{n}{d}\rfloor} \sum_{j=1}^{\lfloor\frac{n}{d}\rfloor} i*j* [\gcd(i,j)==1] \\
+&= \sum_{d=1}^n d^3\sum_{i=1}^{\lfloor\frac{n}{d}\rfloor} \sum_{j=1}^{\lfloor\frac{n}{d}\rfloor} i*j* \sum_{k \mid gcd(i,j)}\mu(k) \\
+&= \sum_{d=1}^n d^3 \sum_{k=1}^{\lfloor\frac{n}{d}\rfloor} d^2\mu (d)\sum_{i=1}^{\lfloor\frac{n}{dk}\rfloor}
+\sum_{j=1}^{\lfloor\frac{n}{dk}\rfloor} i*j\\
+&= \sum_{d=1}^n d^3 \sum_{k=1}^{\lfloor\frac{n}{d}\rfloor} k^2*\mu (k) *g(\lfloor\frac{n}{dk}\rfloor)
+$$
+
+其中$g(x)=(\frac{x(x+1)}{2})^2$
+
+不妨令$T=d*k$
+
+那么
+$$
+\sum_{d=1}^n d^3 \sum_{k=1}^{\lfloor\frac{n}{d}\rfloor} k^2*\mu (k) *g(\lfloor\frac{n}{dk}\rfloor) &=\sum_{d=1}^n  \sum_{k=1}^{\lfloor\frac{n}{d}\rfloor} k^2*\mu (k) *g(\lfloor\frac{n}{dk}\rfloor) *d^3\\
+&=\sum_{d=1}^n  \sum_{d|T} T^2*\mu (\frac{T}{d}) *g(\lfloor\frac{n}{T}\rfloor) *d\\
+&=\sum_{T=1}^n  g(\lfloor\frac{n}{T}\rfloor) *T^2 \sum_{d|T} \mu (\frac{T}{d})  *d\\
+$$
+由于$\mu*id=\varphi$
+
+于是
+$$
+\sum_{T=1}^n  g(\lfloor\frac{n}{T}\rfloor) *T^2 \sum_{d|T} \mu (\frac{T}{d})  *d &=
+ \sum_{T=1}^n  g(\lfloor\frac{n}{T}\rfloor) *T^2 \varphi(T) \\
+$$
+然后对于前半部分正常维护后半部分用杜教筛求即可。
+
+```c++
+vector<int>phi,prime,v;
+vector<mint>pre;
+map<ll,mint>ppre;
+void init()
+{
+	phi.resize(N);
+	prime.resize(N);
+	v.resize(N);
+	pre.resize(N);
+	phi[1] = 1;
+	int tot = 0;
+	for(int i = 2; i < N; ++i)
+	{
+		if(v[i] == 0) {
+			phi[i] = i - 1;
+			v[i] = i;
+			prime[++tot] = i;
+		}
+		for(int j = 1; j <= tot; j ++)
+		{ 
+			if(prime[j] > v[i] || prime[j] > N / i) break;
+			v[i * prime[j]] = prime[j];
+			phi[i * prime[j]] = phi[i] * (i % prime[j] ? prime[j] - 1 : prime[j]);
+		}
+	}
+	for(int i = 1; i < N; ++i)
+	{
+		pre[i] = pre[i - 1] + 1ll * phi[i] * i % mod * i % mod;
+	}
+}
+
+//map<ll,
+mint inv2,inv3;
+mint query_s(ll x)
+{
+	mint t = mint(x);
+	return t * (t + 1) * (2 * t + 1) * inv2 * inv3;
+}
+mint query_g(ll x)
+{
+	mint r = mint(x);
+	r = r * (r + 1) * inv2;
+	return r * r;
+}
+mint query(ll n)
+{
+	if(n < N) return pre[n];
+	if(ppre.find(n) != ppre.end()) return ppre[n];	
+	mint res = query_g(n);
+	for(ll l = 2, r; l <= n; l = r + 1)
+	{
+		r = min(n, n / (n / l));
+		mint rk = query_s(r) - query_s(l - 1);
+		res -= rk * query(n / l);
+	}
+	return ppre[n] = res;
+}
+mint G(ll x)
+{
+	mint r = x;
+	r = r * r * (r + 1) * (r + 1);
+	r *= qpow(mint(4), mod - 2);
+	return r;
+}
+mint ask(ll n)
+{
+	mint res = 0;
+	for(ll l = 1, r; l <= n; l = r + 1)
+	{
+		r = min(n, n / (n / l));
+		mint g = G(n / l);
+		mint k = query(r) - query(l - 1);
+		res += g * k;
+	}
+	return res;
+}
+   init();
+    cout<<ask(n)<<'\n';
+```
+
+
+
+## 莫比乌斯函数筛
+
+```c++
+int mu[N];
+bool vis[N];
+void init()
+{
+	int n = 1e6;
+	for(int i = 1; i <= n; ++i) mu[i] = 1, vis[i] = 0;
+	for(int i = 2; i <= n; ++i)
+	{
+		if(vis[i]) continue;
+		mu[i] = -1;
+		for(int j = 2 * i; j <= n; j += i)
+		{
+			vis[j] = 1;
+			if((j / i) % i == 0) mu[j] = 0;
+			else mu[j] *= -1;
+		}
+	}
+}
+```
+
+## 欧拉函数筛
+
+```c++
+int p[N], phi[N];
+int tot;
+bool vis[N];
+void init()
+{
+ 	for(int i = 1; i <= n; ++i) phi[i] = i;
+    for(int i = 2; i <= n; ++i)
+    {
+        if(phi[i] == i)
+        {
+            for(int j = i; j <= n; j += i)
+            {
+                phi[j] = phi[j] /i * (i - 1);
+			}
+		}
+	}
+}
+```
+
+## 积性函数筛
+
+```c++
+int mnp[maxn], pc[maxn]; // 最小质因子以及次数
+int prime[maxn]; //记录素数
+int vis[maxn]; //记录是否是素数
+int last[maxn]; //记录去掉最小质因子后的数是多少
+for(int i = 2; i <= n; ++i)
+{
+    if(!vis[i]) // i是素数
+    {
+        prime[++tot] = i;
+        mnp[i] = i;
+        pc[i] = 1;
+        last[i] = 1;
+    }
+    f[i] = last[i] * get(mnp[i], pc[i]);// get计算素数的k次方的结果，可以记忆化。
+    for(int j = 1; j <= tot && i * prime[j] <= n; ++j)
+    {
+        vis[i * prime[j]] = 1;
+        mnp[i * prime[j]] = prime[j];
+        if(!(i % prime[j]))
+        {
+            pc[i * prime[j]] = pc[i] + 1;
+            last[i * prime[j]] = last[i];
+            break;
+		}
+        else
+        {
+            pc[i * prime[j]] = 1;
+            last[i * prime[j]] = i;
+		}
+    }
+}
+```
+
