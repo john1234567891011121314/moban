@@ -27,7 +27,7 @@ def main():
         Path(folder).mkdir(exist_ok=True)
 
         # 2. 在本块里再切所有二级标题
-        for m in re.finditer(r'^##\s+(.+?)\s*\n(.*?)(?=^##|\Z)', body, re.M | re.S):
+        for m in re.finditer(r'##\s+(.+?)\s*\n(.*?)(?=^##\s|^#\s|\Z)', body, re.M | re.S):
             file_title = m.group(1).strip()
             body_text  = m.group(2)
             safe_name  = re.sub(r'[\\/:*?"<>|]', '_', file_title)
