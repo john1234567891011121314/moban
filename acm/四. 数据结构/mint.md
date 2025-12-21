@@ -19,7 +19,7 @@ T qpow(T base, ll power) {
 struct mint {
     int x;
     mint(int x = 0) : x(norm(x)) {}
-    mint(ll x) : x(norm((int)(x % mod))n) {}
+    mint(ll x) : x(norm((int)(x % mod))) {}
     int val() const { return x; }
     mint operator-() const { return mint(norm(mod - x)); }
     mint inv() const { return qpow(*this, mod - 2); }
